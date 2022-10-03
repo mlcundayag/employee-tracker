@@ -12,15 +12,49 @@ const figlet = require('figlet');
 //terminal color output style
 const outputErrorText = (text) => console.log(`\x1b[31m${text}\x1b[0m`);
 const outputWelcomeText = (text)  => console.log(`\x1b[33m${text}\x1b[0m`);
+const outputSuccessText = (text) => console.log(`\x1b[32m${text}\x1b[0m`);
 
-figlet("Employee\n Manager", (err, data)=> {
+const welcome = () => {
+    figlet("Employee\n Manager", (err, data) => {
     if(err) {
         outputErrorText('Something went wrong...');
         console.dir(err);
         return
     }
     outputWelcomeText(data)
-});
+})
+};
+
+//create query for the main menu
+const mainMenu = () => {
+    return inquirer
+    .prompt([
+        {
+            type: "list",
+            name: "menu",
+            message: `\x1b[33mWhat would you like to do?\x1b[0m`,
+            choices: [
+                'View All Employees',
+                'Add an Employee',
+                'Update an Employee',
+                'Remove an Employee',
+                'View All Roles',
+                'Add a Role',
+                'Update a Role',
+                'Remove a Role',
+                'View All Departments',
+                'Add a Department',
+                'Update a Department',
+                'Remove a Department',
+                'Exit'
+            ]
+        }
+    ])
+}
+
+welcome()
+mainMenu()
+
 
 
 
