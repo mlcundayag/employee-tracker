@@ -15,13 +15,14 @@ const outputWelcomeText = (text)  => console.log(`\x1b[33m${text}\x1b[0m`);
 const outputSuccessText = (text) => console.log(`\x1b[32m${text}\x1b[0m`);
 
 const welcome = () => {
-    figlet("Employee\n Manager", (err, data) => {
+    figlet("Employee\nTracker", function(err, data){
     if(err) {
         outputErrorText('Something went wrong...');
         console.dir(err);
         return
     }
     outputWelcomeText(data)
+    mainMenu()
 })
 };
 
@@ -50,11 +51,57 @@ const mainMenu = () => {
             ]
         }
     ])
+    .then((answer) => {
+        const { menu } = answer;
+        if(menu === 'View All Employees') {
+            viewEmployees();
+        }
+        if (menu === 'Add an Employee') {
+            addEmployee();
+        }
+        if (menu === 'Update an Employee') {
+            updateEmployee();
+        }
+        if (menu === 'Remove an Employee') {
+            removeEmployee();
+        }
+        if (menu === 'View All Roles') {
+            viewRoles();
+        } 
+        if (menu === 'Add a Role') {
+            addRole();
+        } 
+        if (menu === 'Update a Role') {
+            updateRole();
+        } 
+        if (menu === 'Remove a Role') {
+            removeRole();
+        }
+        if (menu === 'View All Departments') {
+            viewDepartments();
+        }
+        if (menu === 'Add a Department') {
+            addDepartment();
+        } 
+        if (menu === 'Update a Department') {
+            updateDepartment();
+        }
+        if (menu === 'Remove a Department') {
+            removeDepartment();
+        }
+        if (menu === 'Exit') {
+            outputSuccessText('Success!\nThanks for using Employee Tracker! 😀 ');
+        }   
+    })
 }
 
-welcome()
-mainMenu()
+const viewEmployees = () => {
+    
+}
 
+
+
+welcome()
 
 
 
