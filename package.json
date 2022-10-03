@@ -22,7 +22,8 @@
   "homepage": "https://github.com/mlcundayag/employee-tracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
+    "figlet": "^1.5.2",
     "inquirer": "^8.2.4",
-    "mysql2": "^2.3.3"
+    "mysql2": "^2.2.5"
   }
 }
