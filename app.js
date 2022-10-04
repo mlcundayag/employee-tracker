@@ -526,6 +526,41 @@ const updateDepartment = () => {
     })
 }
 
+//delete department 
+const removeDepartment = () => {
+    db.query(`SELECT * FROM department`, (err, results) => {
+        if (err) outputErrorText(err);
+        const deptList = [];
+        results.forEach(({ name, id }) => {
+            deptList.push({
+                name: name,
+                value: id
+            })
+        });
+        const increment = () => {
+            db.query(`ALTER TABLE department AUTO_INCREMENT = 1;`, (err, res) => {
+                if (err) throw err;
+            });
+        }
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "delDept",
+                message: `\x1b[33mWhich department do you want to remove?\x1b[0m`,
+                choices: deptList
+            }
+        ])
+        .then(data => {
+            db.query(`DELETE FROM department WHERE id = ?`, [data.delDept], (err, res) => {
+                outputSuccessText(`successfully remove department ${data.delDept}`);
+                increment();
+                viewDepartments();
+            })
+        })
+    })
+}
+
 welcome()
 
 
