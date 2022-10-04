@@ -466,6 +466,23 @@ const viewDepartments = () => {
     })
 }
 
+//add a department
+const addDepartment = () => {
+    inquirer
+    .prompt([{
+        type: "input",
+        name: "depName",
+        message: `\x1b[33mWhat is the name of the department?\x1b[0m`,
+    }])
+    .then(data => {
+        db.query(`INSERT INTO department SET ?`, {name: data.depName}, (err, res) => {
+            if (err) throw err;
+            outputSuccessText(`successfully added ${data.depName} with id ${res.insertId}`);
+            viewDepartments();
+        })
+    })
+}
+
 welcome()
 
 
