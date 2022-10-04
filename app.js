@@ -117,7 +117,7 @@ const viewEmployees = () => {
         employee.last_name,
         role.title,
         department.name AS 'department',
-        role.salary,
+        role.salary AS 'salary ($)',
         CONCAT(manager.first_name, ' ', manager.last_name) AS 'manager'
         FROM employee
         LEFT JOIN role ON employee.role_id = role.id
@@ -300,6 +300,21 @@ const removeEmployee = () => {
             })
         })
     })  
+}
+
+//view all roles 
+const viewRoles = () => {
+    db.query(`SELECT 
+        role.id,
+        role.title,
+        department.name AS 'department',
+        role.salary AS 'salary ($)'
+        FROM role
+        LEFT JOIN department ON role.department_id = department.id`, (err, results) => {
+        console.log("\n\n");
+        console.table(results);
+        mainMenu()    
+        })
 }
 
 welcome()
