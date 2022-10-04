@@ -19,6 +19,11 @@ const db = mySQL.createConnection({
     outputSuccessText('Connected to database')
 );
 
+db.connect(function (err) {
+    if (err) throw err;
+})
+
+
 //render welcome sign using figlet
 const welcome = () => {
     figlet("Employee\nTracker", function (err, data) {
@@ -124,6 +129,17 @@ const viewEmployees = () => {
     })
 }
 
+// // example code, does not work, remove 
+// function viewDepartments() {
+//     db.findAllDepartments()
+//     .then(([rows]) => {
+//         let dapartments = rows
+//         console.log(departments)
+//     })
+//     .then(() => loadMorePrompts())
+// }
+
+
 //adding an employee
 const addEmployee = () => {
     //generate roles list
@@ -187,81 +203,65 @@ const addEmployee = () => {
                         if (err) throw err;
                         outputSuccessText(`successfully inserted employee ${data.firstName} ${data.lastName} with id ${res.insertId}`);
                         viewEmployees()
-                    })   
+                    })
                 })
         });
     })
 }
 
-
-// const addEmployee2 = () => {
-//     return inquirer
-//         .prompt([
-//             {
-//                 type: "input",
-//                 name: "firstName",
-//                 message: `\x1b[33mWhat is the employee's first name?\x1b[0m`,
-//             },
-//             {
-//                 type: "input",
-//                 name: "lastName",
-//                 message: `\x1b[33mWhat is the employee's last name?\x1b[0m`,
-//             }
-//         ])
-//         .then((data) => {
-//             const firstName = data.firstName;
-//             const lastName = data.lastName;
-//             db.query(`SELECT role.id, role.title
-// FROM role;`, (err, results) => {
-//                 if (err) throw err;
-//                 const rolesList = results.map(({ id, title }) => ({ name: title, value: id }));
-//                 inquirer
-//                     .prompt([
-//                         {
-//                             type: 'list',
-//                             name: 'role',
-//                             message: `\x1b[33mWhat is the employee's role?\x1b[0m`,
-//                             choices: rolesList
-//                         }
-//                     ])
-//                     .then(roleChoice => {
-//                         const role = roleChoice.role;
-//                         db.query(`SELECT * FROM employee`, (err, results) => {
-//                             if (err) throw err;
-//                             const managersList = results.map(({ id, first_name, last_name }) => ({ name: `${first_name} ${last_name}`, value: id }));
-//                             inquirer
-//                                 .prompt([
-//                                     {
-//                                         type: 'list',
-//                                         name: 'manager',
-//                                         message: `\x1b[33mWho is the employee's manager?\x1b[0m`,
-//                                         choices: managersList
-//                                     }
-//                                 ])
-//                                 .then(managerChoice => {
-//                                     const manager = managerChoice.manager
-//                                     const newEmployee = new Employee(
-//                                         firstName,
-//                                         lastName,
-//                                         role,
-//                                         manager
-//                                     )
-//                                     outputWelcomeText(newEmployee);
-//                                     employees.push(newEmployee)
-//                                     db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id)
-//                         VALUES(?)`, [newEmployee], (err, results) => {
-//                                         if (err) throw err;
-//                                         console.table(results)
-//                                     })
-//                                     mainMenu()
-//                                 })
-//                         })
-//                     })
-//             })
-//         })
-// }
-
-
+const updateEmployee = () => {
+    //generate employee list
+    db.query(`SELECT * FROM employee;`, (err, employeeResults) => {
+        if (err) outputErrorText(err);
+        const employeeList = [];
+        employeeResults.forEach(({ first_name, last_name, id }) => {
+            employeeList.push({
+                name: `${first_name} ${last_name}`,
+                value: id
+            });
+        });
+        //generate role list
+        db.query(`SELECT * FROM ROLE;`, (err, roleResults) => {
+            if (err) outputErrorText(err);
+            const roleList = [];
+            roleResults.forEach(({ title, id }) => {
+                roleList.push({
+                    name: title,
+                    value: id
+                });
+            });
+            inquirer
+                .prompt([
+                    {
+                        type: "list",
+                        name: "updateEmployee",
+                        message: `\x1b[33mWhich employee do you want to update title?\x1b[0m`,
+                        choices: employeeList
+                    },
+                    {
+                        type: "list",
+                        name: "updateTitle",
+                        message: `\x1b[33mPlease select their new title...\x1b[0m`,
+                        choices: roleList
+                    }
+                ])
+                .then(data => {
+                    db.query(`UPDATE employee SET ? WHERE ?`, [
+                        {
+                            role_id: data.updateTitle
+                        },
+                        {
+                            id: data.updateEmployee
+                        }
+                    ], (err, res) => {
+                        if (err) throw err;
+                        outputSuccessText(`successfully updated employee ${data.updateEmployee} role with ${data.updataTitle}`);
+                        viewEmployees()
+                    })
+                })
+        })
+    })
+}
 
 welcome()
 
