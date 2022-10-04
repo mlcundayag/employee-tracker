@@ -483,6 +483,49 @@ const addDepartment = () => {
     })
 }
 
+//update department name
+const updateDepartment = () => {
+    //generate department list
+    db.query(`SELECT * FROM department;`, (err, depResult) => {
+        if(err) outputErrorText(err);
+        const deptList = [];
+        depResult.forEach(({ name, id }) => {
+            deptList.push({
+                name: name,
+                value: id
+            })
+        });
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "updateDept",
+                message: `\x1b[33mWhich department do you want to update name?\x1b[0m`,
+                choices: deptList
+            },
+            {
+                type: "input",
+                name: "newNameDept",
+                message: `\x1b[33mPlease enter new name for this department...\x1b[0m`,
+            }
+        ])
+        .then(data => {
+            db.query(`UPDATE department SET ? WHERE ?`, [
+                {
+                    name: data.newNameDept
+                },
+                {
+                    id: data.updateDept
+                }
+            ], (err, res) => {
+                if(err) throw err;
+                outputSuccessText(`successfully change department name to ${data.newNameDept}`);
+                viewDepartments()
+            })
+        })
+    })
+}
+
 welcome()
 
 
