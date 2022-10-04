@@ -53,6 +53,7 @@ const mainMenu = () => {
                     'View All Roles',
                     'View Employees By Manager',
                     'View Employees By Department',
+                    'View Department Budget',
                     'Add a Department',
                     'Add a Role',
                     'Add an Employee',
@@ -112,6 +113,10 @@ const mainMenu = () => {
             if (menu === 'View Employees By Department') {
                 viewbyDepartment();
             }
+            //Bonus view department budget
+            if (menu === 'View Department Budget') {
+                viewBudget();
+            }
             if (menu === 'Exit') {
                 outputSuccessText('Success!\nThanks for using Employee Tracker! 😀 ');
                 db.end()
@@ -138,17 +143,6 @@ const viewEmployees = () => {
         mainMenu()
     })
 }
-
-// // example code, does not work, remove 
-// function viewDepartments() {
-//     db.findAllDepartments()
-//     .then(([rows]) => {
-//         let dapartments = rows
-//         console.log(departments)
-//     })
-//     .then(() => loadMorePrompts())
-// }
-
 
 //adding an employee
 const addEmployee = () => {
@@ -673,6 +667,45 @@ const viewbyDepartment = () => {
             WHERE department.id = ${data.viewbyDept}`, (err, res) => {
                 if (err) throw err;
                 outputSuccessText(`You are viewing employees by department`);
+                console.log("\n");
+                console.table(res);
+                mainMenu()
+            })
+        })
+    })
+}
+
+//BONUS: view department budget 
+const viewBudget = () => {
+    db.query(`SELECT * FROM department;`, (err, deptRes) => {
+        if(err) outputErrorText(err);
+        const deptList = [];
+        deptRes.forEach(({ name, id }) =>{
+            deptList.push({
+                name: name,
+                value: id
+            })
+        })
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "budget",
+                message: `\x1b[33mPlease select department...\x1b[0m`,
+                choices: deptList
+            }
+        ])
+        .then(data => {
+            db.query(`SELECT
+            department.name AS 'department',
+            SUM(role.salary) AS 'budget'
+            FROM employee
+            LEFT JOIN role ON employee.role_id = role.id
+            LEFT JOIN department ON role.department_id = department.id
+            LEFT JOIN employee manager ON employee.manager_id = manager.id
+            WHERE department.id = ${data.budget}`, (err, res) => {
+                if (err) throw err;
+                outputSuccessText(`You are viewing department budget`);
                 console.log("\n");
                 console.table(res);
                 mainMenu()
