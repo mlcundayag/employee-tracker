@@ -318,7 +318,7 @@ const viewRoles = () => {
 }
 
 //adding a role
-addRole = () => {
+const addRole = () => {
     //generate department list
     db.query(`SELECT department.id, department.name
             FROM department;`, (err, deptResults) => {
@@ -371,7 +371,7 @@ addRole = () => {
 }
 
 //updating a role
-updateRole = () => {
+const updateRole = () => {
     //generate role list
     db.query(`SELECT * FROM role;`, (err, roleResults) => {
         if (err) outputErrorText(err);
@@ -415,6 +415,42 @@ updateRole = () => {
                 if (err) throw err;
                     outputSuccessText(`successfully updated role's salary with ${data.updateSalary}`);
                     viewRoles()
+            })
+        })
+    })
+}
+
+const removeRole = () => {
+    db.query(`SELECT * FROM role`, (err, results) => {
+        if (err) outputErrorText(err);
+        const roleList = [];
+        results.forEach(({ title, id}) => {
+            roleList.push({
+                name: title,
+                value: id
+            })
+        });
+        const increment = () => {
+            db.query(`ALTER TABLE role AUTO_INCREMENT = 1;`, (err, res) => {
+                if (err) throw err;
+            });
+        }
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "delRole",
+                message: `\x1b[33mWhich role do you want to remove?\x1b[0m`,
+                choices: roleList
+            }
+        ])
+        .then(data => {
+            db.query(`DELETE FROM role WHERE id = ?`, 
+            [data.delRole],
+            (err, res) => {
+                outputSuccessText(`successfully remove role ${data.delRole}`);
+                increment();
+                viewRoles();
             })
         })
     })
