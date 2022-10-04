@@ -420,6 +420,7 @@ const updateRole = () => {
     })
 }
 
+//remove a role
 const removeRole = () => {
     db.query(`SELECT * FROM role`, (err, results) => {
         if (err) outputErrorText(err);
@@ -453,6 +454,15 @@ const removeRole = () => {
                 viewRoles();
             })
         })
+    })
+}
+
+//view all departments
+const viewDepartments = () => {
+    db.query(`SELECT department.id, department.name AS 'department' FROM department`, (err, res) => {
+        console.log("\n\n");
+        console.table(res);
+        mainMenu()
     })
 }
 
