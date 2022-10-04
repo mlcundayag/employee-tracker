@@ -60,6 +60,7 @@ const mainMenu = () => {
                     'Remove a Department',
                     'Remove a Role',
                     'Remove an Employee',
+                    'View Employee By Manager',
                     'Exit'
                 ]
             }
@@ -101,6 +102,10 @@ const mainMenu = () => {
             }
             if (menu === 'Remove a Department') {
                 removeDepartment();
+            }
+            //Bonus view employee by manager
+            if (menu === 'View Employee By Manager') {
+                viewbyManager();
             }
             if (menu === 'Exit') {
                 outputSuccessText('Success!\nThanks for using Employee Tracker! 😀 ');
@@ -576,6 +581,7 @@ const removeDepartment = () => {
             ])
             .then(data => {
                 db.query(`DELETE FROM department WHERE id = ?`, [data.delDept], (err, res) => {
+                    if (err) throw err;
                     outputSuccessText(`successfully remove department ${data.delDept}`);
                     increment();
                     viewDepartments();
@@ -583,5 +589,49 @@ const removeDepartment = () => {
             })
     })
 }
+
+//BONUS: view by employee by manager
+const viewbyManager = () => {
+    db.query(`SELECT * FROM employee;`, (err, mgrResults) => {
+        if(err)outputErrorText(err);
+        const mgrList = [];
+        mgrResults.forEach(({ first_name, last_name, id}) => {
+            mgrList.push({
+                name: `${first_name} ${last_name}`,
+                value: id
+            });
+        });
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "viewMgr",
+                message: `\x1b[33mPlease select manager...\x1b[0m`,
+                choices: mgrList
+            }
+        ])
+        .then((data) => {
+            db.query(`SELECT
+            CONCAT(manager.first_name, ' ', manager.last_name) AS 'manager',
+            employee.first_name, 
+            employee.last_name,
+            role.title,
+            department.name AS 'department',
+            role.salary AS 'salary ($)'
+            FROM employee
+            LEFT JOIN role ON employee.role_id = role.id
+            LEFT JOIN department ON role.department_id = department.id
+            LEFT JOIN employee manager ON employee.manager_id = manager.id
+            WHERE manager.id = ${data.viewMgr}`, (err, res) => {
+                if (err) throw err;
+                outputSuccessText(`You are viewing employees by manager`);
+                console.table(res);
+                mainMenu()
+            })
+        })
+    })
+}
+
+//BONUS: view employees by department
 
 welcome()
