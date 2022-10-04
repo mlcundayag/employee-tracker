@@ -49,8 +49,8 @@ const mainMenu = () => {
                 message: `\x1b[33mWhat would you like to do?\x1b[0m`,
                 choices: [
                     'View All Departments',
-                    'View All Employees',
                     'View All Roles',
+                    'View All Employees',
                     'View Employees By Manager',
                     'View Employees By Department',
                     'View Department Budget',
