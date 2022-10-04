@@ -269,7 +269,7 @@ const removeEmployee = () => {
     db.query(`SELECT * FROM employee`, (err, results) => {
         if (err) outputErrorText(err);
         const employeeList = [];
-        results.forEach(({first_name, last_name, id}) => {
+        results.forEach(({ first_name, last_name, id }) => {
             employeeList.push({
                 name: `${first_name} ${last_name}`,
                 value: id
@@ -281,25 +281,25 @@ const removeEmployee = () => {
             })
         }
         inquirer
-        .prompt([
-            {
-                type: "list",
-                name: "delEmployee",
-                message: `\x1b[33mWhich employee do you want to remove?\x1b[0m`,
-                choices: employeeList
-            }
-        ])
-        .then(data => {
-            db.query(`DELETE FROM employee WHERE id = ?`, 
-                [data.delEmployee]
-            , (err, res) => {
-                if (err) throw err;
-                outputSuccessText(`successfully remove employee ${data.delEmployee}`);
-                increment();
-                viewEmployees();
+            .prompt([
+                {
+                    type: "list",
+                    name: "delEmployee",
+                    message: `\x1b[33mWhich employee do you want to remove?\x1b[0m`,
+                    choices: employeeList
+                }
+            ])
+            .then(data => {
+                db.query(`DELETE FROM employee WHERE id = ?`,
+                    [data.delEmployee]
+                    , (err, res) => {
+                        if (err) throw err;
+                        outputSuccessText(`successfully remove employee ${data.delEmployee}`);
+                        increment();
+                        viewEmployees();
+                    })
             })
-        })
-    })  
+    })
 }
 
 //view all roles 
@@ -313,8 +313,111 @@ const viewRoles = () => {
         LEFT JOIN department ON role.department_id = department.id`, (err, results) => {
         console.log("\n\n");
         console.table(results);
-        mainMenu()    
+        mainMenu()
+    })
+}
+
+//adding a role
+addRole = () => {
+    //generate department list
+    db.query(`SELECT department.id, department.name
+            FROM department;`, (err, deptResults) => {
+        if (err) outputErrorText(err);
+        const deptList = [];
+        deptResults.forEach(({ id, name }) => {
+            deptList.push({
+                name: name,
+                value: id
+            });
+        });
+        inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "title",
+                message: `\x1b[33mWhat is the role's title?\x1b[0m`,
+            },
+            {
+                type: "input",
+                name: "salary",
+                message: `\x1b[33mHow much is the role's salary?\x1b[0m (don't include dollar sign and commas)`,
+                validate: function (name) {
+                    if (isNaN(name) || (!name)) {
+                        outputErrorText("Please enter role's salary (don't include dollar sign and commas)...")
+                    } else {
+                        return true
+                    }
+                }
+            },
+            {
+                type: "list",
+                name: "department",
+                message: `\x1b[33mWhich department does the role belong to?\x1b[0m`,
+                choices: deptList
+            }
+        ])
+        .then(data => {
+            db.query(`INSERT INTO role SET ?`, {
+                title: data.title,
+                salary: data.salary,
+                department_id: data.department
+            }, (err, res) => {
+                if (err) throw err;
+                outputSuccessText(`successfully added ${data.title} with a salary of ${data.salary} and id ${res.insertId}`);
+                viewRoles();
+            })
         })
+    })
+}
+
+//updating a role
+updateRole = () => {
+    //generate role list
+    db.query(`SELECT * FROM role;`, (err, roleResults) => {
+        if (err) outputErrorText(err);
+        const roleList = [];
+        roleResults.forEach(({ title, id }) => {
+            roleList.push({
+                name: title,
+                value: id
+            })
+        });
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "updateRole",
+                message: `\x1b[33mWhich title do you want to update salary?\x1b[0m`,
+                choices: roleList
+            },
+            {
+                type: "input",
+                name: "updateSalary",
+                message: `\x1b[33mPlease enter their new salary...\x1b[0m (don't include dollar sign and commas)`,
+                validate: function (name) {
+                    if (isNaN(name) || (!name)) {
+                        outputErrorText("Please enter role's salary (don't include dollar sign and commas)...")
+                    } else {
+                        return true
+                    }
+                }
+            }
+        ])
+        .then(data => {
+            db.query(`UPDATE role SET ? WHERE ?`, [
+                {
+                    salary: data.updateSalary
+                },
+                {
+                    id: data.updateRole
+                }
+            ], (err, res) => {
+                if (err) throw err;
+                    outputSuccessText(`successfully updated role's salary with ${data.updateSalary}`);
+                    viewRoles()
+            })
+        })
+    })
 }
 
 welcome()
