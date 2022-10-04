@@ -51,6 +51,8 @@ const mainMenu = () => {
                     'View All Departments',
                     'View All Employees',
                     'View All Roles',
+                    'View Employees By Manager',
+                    'View Employees By Department',
                     'Add a Department',
                     'Add a Role',
                     'Add an Employee',
@@ -60,7 +62,6 @@ const mainMenu = () => {
                     'Remove a Department',
                     'Remove a Role',
                     'Remove an Employee',
-                    'View Employee By Manager',
                     'Exit'
                 ]
             }
@@ -104,8 +105,12 @@ const mainMenu = () => {
                 removeDepartment();
             }
             //Bonus view employee by manager
-            if (menu === 'View Employee By Manager') {
+            if (menu === 'View Employees By Manager') {
                 viewbyManager();
+            }
+            //Bonus view employee by department
+            if (menu === 'View Employees By Department') {
+                viewbyDepartment();
             }
             if (menu === 'Exit') {
                 outputSuccessText('Success!\nThanks for using Employee Tracker! 😀 ');
@@ -625,6 +630,7 @@ const viewbyManager = () => {
             WHERE manager.id = ${data.viewMgr}`, (err, res) => {
                 if (err) throw err;
                 outputSuccessText(`You are viewing employees by manager`);
+                console.log("\n");
                 console.table(res);
                 mainMenu()
             })
@@ -633,5 +639,46 @@ const viewbyManager = () => {
 }
 
 //BONUS: view employees by department
+const viewbyDepartment = () => {
+    db.query(`SELECT * FROM department;`, (err, deptRes) => {
+        if(err)outputErrorText(err);
+        const deptList = [];
+        deptRes.forEach(({ name, id }) =>{
+            deptList.push({
+                name: name,
+                value: id
+            })
+        })
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "viewbyDept",
+                message: `\x1b[33mPlease select dept...\x1b[0m`,
+                choices: deptList
+            }
+        ])
+        .then((data) => {
+            db.query(`SELECT
+            department.name AS 'department',
+            employee.first_name, 
+            employee.last_name,
+            role.title,
+            role.salary AS 'salary ($)',
+            CONCAT(manager.first_name, ' ', manager.last_name) AS 'manager'
+            FROM employee
+            LEFT JOIN role ON employee.role_id = role.id
+            LEFT JOIN department ON role.department_id = department.id
+            LEFT JOIN employee manager ON employee.manager_id = manager.id
+            WHERE department.id = ${data.viewbyDept}`, (err, res) => {
+                if (err) throw err;
+                outputSuccessText(`You are viewing employees by department`);
+                console.log("\n");
+                console.table(res);
+                mainMenu()
+            })
+        })
+    })
+}
 
 welcome()
