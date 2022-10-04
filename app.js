@@ -209,6 +209,7 @@ const addEmployee = () => {
     })
 }
 
+//updating employee
 const updateEmployee = () => {
     //generate employee list
     db.query(`SELECT * FROM employee;`, (err, employeeResults) => {
@@ -261,6 +262,44 @@ const updateEmployee = () => {
                 })
         })
     })
+}
+
+//delete an employee
+const removeEmployee = () => {
+    db.query(`SELECT * FROM employee`, (err, results) => {
+        if (err) outputErrorText(err);
+        const employeeList = [];
+        results.forEach(({first_name, last_name, id}) => {
+            employeeList.push({
+                name: `${first_name} ${last_name}`,
+                value: id
+            });
+        });
+        const increment = () => {
+            db.query(`ALTER TABLE employee AUTO_INCREMENT = 1;`, (err, res) => {
+                if (err) throw err;
+            })
+        }
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "delEmployee",
+                message: `\x1b[33mWhich employee do you want to remove?\x1b[0m`,
+                choices: employeeList
+            }
+        ])
+        .then(data => {
+            db.query(`DELETE FROM employee WHERE id = ?`, 
+                [data.delEmployee]
+            , (err, res) => {
+                if (err) throw err;
+                outputSuccessText(`successfully remove employee ${data.delEmployee}`);
+                increment();
+                viewEmployees();
+            })
+        })
+    })  
 }
 
 welcome()
