@@ -42,7 +42,7 @@ I was able to successfully create a functioning employee tracker without any err
 ## Links
 
 1. [GitHub](https://github.com/mlcundayag/employee-tracker)
-2. [Video Walkthrough]()
+2. [Video Walkthrough](https://drive.google.com/file/d/1T_3IhGBbFCyS4zbVZAy9s6cTQxLIZbN5/view)
 
 
   
